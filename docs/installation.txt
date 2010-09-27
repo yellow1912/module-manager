@@ -1,0 +1,22 @@
+INSTALLATION:
+Upload all files and folders to the correspnding locations. This module automatically installs itself, no need to run any sqlpatch
+
+USUAGE:
+1. admin->tools->module manager
+View all installed modules, perform update and new installation
+More features to be added later
+
+NOTE: this module will attempt to install itself the first time you go to admin->tools->module manager
+
+2. you can also init and call module installer to automatically check and upgrade your module database each time the user visit certain page inside admin (for instance: your module manager page)
+
+require_once(DIR_WS_CLASSES.'module_installer.php');
+$module_installer = new module_installer();
+$module_installer->set_module('your_module_code_name_here'); // make sure you use the module code name as the name of the folder that contains your db patches and such
+$module_installer->upgrade_module();
+
+3. Set the permission of the following folder to 777:
+admin\includes\module_installation
+
+TROUBLESHOOTING:
+After installing itself, this module writes a file named ".keep" in admin\includes\module_installation, if your server doesnt allow it to do so, it may make the module attempting to install itself everytime. The fix is easy though, just manually create a .keep file there (after the module has already installed itself, of course)

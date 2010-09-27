@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<root>
+	<actions>
+		<action>
+			<type>copy</type>
+			<source></source>
+			<destination></destination>
+		</action>
+		<action>
+			<type>edit</type>
+			<source></source>
+			<find></find>
+			<replace></replace>
+		</action>
+		<action>
+			<type>remove</type>
+			<source></source>
+		</action>
+		<action>
+			<type>chmod</type>
+			<source></source>
+			<permission></permission>
+		</action>
+	</actions>
+</root>
