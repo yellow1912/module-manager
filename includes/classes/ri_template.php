@@ -1,27 +1,39 @@
 <?php
-class RITemplate extends template_func{
+class RITemplate{
 	var $view;
   var $path;
   var $css_path;
-  var $base;
+  var $template;
   var $data = array();
   var $admin = false;
   
-  function RITemplate($admin = false){
+  function RITemplate($admin = false, $plugin = '', $base = '', $template = ''){
   	$this->admin = $admin;
   	if($this->admin){
-  		if(empty($this->base)) $this->base = preg_replace('/\.php/','',substr(strrchr($_SERVER['PHP_SELF'],'/'),1),1);
+  		$root = empty($plugin) ? DIR_FS_ADMIN."includes/templates/" : DIR_FS_CATALOG."includes/plugins/$plugin/admin/templates/";
+  		$this->template = empty($template) ? 'template_default' : $template;
+  		$this->base = empty($base) ? preg_replace('/\.php/','',substr(strrchr($_SERVER['PHP_SELF'],'/'),1),1) : $base;
   	}
-  	else 
-  		if(empty($base)) $this->base = $_GET['main_page'];
+  	else{ 
+  		$root = empty($plugin) ? DIR_FS_CATALOG."includes/templates/" : DIR_FS_CATALOG."includes/plugins/$plugin/catalog/templates/";
+  		$this->template = empty($template) ? DIR_WS_TEMPLATE : $template;
+  		$this->base = empty($base) ? $_GET['main_page'] : $base;
+  	}
+  	$this->path = $root."{template}/{t}/{$this->base}/";
   }
   
-//  
-//  function loadAdminCss(){
-//  	if($this->_checkPath(DIR_FS_ADMIN.$this->css_path));
-//  	echo '<link rel="stylesheet" type="text/css" href="'.$this->css_path.'">';
-//  }
-  
+  function setOpt($plugin = '', $base = '', $template = ''){
+  	if($this->admin){
+  		$root = empty($plugin) ? DIR_FS_ADMIN."includes/templates/" : DIR_FS_CATALOG."includes/plugins/$plugin/admin/templates/";
+  	}
+  	else{ 
+  		$root = empty($plugin) ? DIR_FS_CATALOG."includes/templates/" : DIR_FS_CATALOG."includes/plugins/$plugin/catalog/templates/";
+  	}
+  	$base = empty($base) ? $this->base : $base;
+  	if(!empty($template)) $this->template = $template;
+  	$this->path = $root."{template}/{t}/$base/";
+  }
+    
   function _checkPath($path){
   	if(file_exists($path))
   		return true;
@@ -80,8 +92,16 @@ class RITemplate extends template_func{
 		}
   }
   
+  
   // admin css
   // $this->css_path = "includes/templates/template_default/css/".$this->base.'.css';
+  
+  function get($t, $view){
+  	if(file_exists($template_file = str_replace(array("{template}", "{t}"), array($this->template, $t), $this->path).$view))
+  		return $template_file;
+  	else 
+  		return str_replace(array("{template}", "{t}"), array("template_default", $t), $this->path).$view;
+  }
   
   function render(){
   	if(empty($this->view)){
@@ -91,23 +111,20 @@ class RITemplate extends template_func{
   			$this->view .= $_GET['action'];
   		$this->view .= '.php';
   	}
-  	
-  	if($this->admin)
-			$this->path = DIR_FS_ADMIN."includes/templates/template_default/templates/".$this->base.'/';
-  	else
-	  	$this->path = $this->get_template_dir($this->view, DIR_WS_TEMPLATE, $this->base, 'templates/'.$this->base).'/';
  
-  	if($this->_checkPath($this->path.$this->view)){
+  	$path = $this->get("templates", $this->view);
+  	
+  	if($this->_checkPath($path)){
   		foreach($this->data as $element)
     	    extract($element, EXTR_SKIP);
   		ob_start();
-  		require_once($this->path.$this->view);
+  		require_once($path);
   		$out = ob_get_clean();
   		print $out;
   	}
   	// error output
   	else{
-  		echo "Render error, file not found(".$this->path.$this->view.")";
+  		echo "Render error, file not found(".$path.")";
   	}
   }
 }
